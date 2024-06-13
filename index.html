@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="Author" content="Kevin Brian Flores Hernández" />
+    <meta name="Description" content="A simple HTML document where my name appears with some styles and animations" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Foro 1</title>
+
+    <!-- Styles -->
+    <style>
+      /* Color Themes */
+      :root {
+        --pr-accent-color: #f3b512;
+        --scnd-accent-color: #4879c4;
+        --negative-action-color-1: #c94625;
+        --negative-action-color-2: #e12c1f;
+
+        --alpha-pr-accent-color: #f3b51280;
+        --transparent-accent-color: #f3b51200;
+
+        /* Dark mode by default */
+        --bg-color: #101012;
+        --text-color: #e2ecf0;
+        --main-card-color: rgba(50, 51, 54, 0.5);
+        --card-color: #313236;
+
+        --alpha-negative-color-1: #c9462580;
+        --transparent-text-color: #e2ecf000;
+      }
+
+      [data-theme="light"] {
+        --bg-color: #e2ecf0;
+        --text-color: #101012;
+        --main-card-color: rgba(209, 216, 235, 0.5);
+        --card-color: #ffffff;
+
+        --alpha-pr-accent-color: #4879c480;
+        --transparent-text-color: #10101200;
+      }
+
+      /* Default Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      ::selection {
+        background-color: transparent;
+      }
+
+      /* Fonts */
+      @font-face {
+        font-family: "Cabin Variable";
+        font-style: normal;
+        font-display: swap;
+        font-weight: 400 700;
+        font-stretch: 75% 100%;
+        src: url(https://cdn.jsdelivr.net/fontsource/fonts/cabin:vf@latest/latin-wdth-normal.woff2) format("woff2-variations");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074,
+          U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+        cursor: text;
+        pointer-events: none;
+        transition: font-size 1s ease-out;
+      }
+
+      p,
+      span {
+        font-size: 1.5rem;
+        font-weight: 400;
+        line-height: 1.5;
+        cursor: text;
+        transition: font-size 1s ease-out;
+      }
+
+      p {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 400;
+        line-height: 1.5;
+        cursor: text;
+        pointer-events: none;
+      }
+
+      small {
+        pointer-events: none;
+        transition: font-size 1s ease-out;
+      }
+
+      html {
+        font-size: 100%;
+        font-family: "Cabin Variable", system-ui, sans-serif;
+        color: var(--text-color);
+      }
+
+      /* General Styles */
+      body {
+        background-color: var(--bg-color);
+        min-height: 100vh;
+        box-shadow: inset 0 0 0 0 var(--transparent-text-color);
+        transition: box-shadow 1s ease-out, background-color 1s ease-out;
+      }
+
+      body.--dropping {
+        box-shadow: inset 0 -8rem 16rem -10rem var(--negative-action-color-2);
+      }
+
+      body.--dropped {
+        box-shadow: inset 0 -12rem 24rem -14rem var(--negative-action-color-2);
+      }
+
+      body.--changing-theme {
+        box-shadow: inset 0 8rem 16rem -10rem var(--pr-accent-color);
+      }
+
+      body.--changed-theme {
+        box-shadow: inset 0 12rem 24rem -14rem var(--pr-accent-color);
+      }
+
+      /* Background blob */
+      /* Source: https://freefrontend.com/css-animated-backgrounds/ (slightly modified by me) */
+      #background {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+
+      #background::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40rem;
+        height: 40rem;
+        background-image: linear-gradient(var(--alpha-pr-accent-color), var(--alpha-negative-color-1));
+        background-size: 250% 250%;
+        background-position: center center;
+        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        filter: blur(calc(40rem / 5));
+        transition: width 1.5s cubic-bezier(0.8, 0.2, 0.2, 0.8), height 1.5s cubic-bezier(0.8, 0.2, 0.2, 0.8),
+          background-position 1s ease-out;
+        animation: rotate 50s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate infinite;
+      }
+
+      #background.--dragging::before {
+        width: 50rem;
+        height: 50rem;
+        animation: rotate 4s linear infinite;
+      }
+
+      #background.--dropping::before {
+        width: 20rem;
+        height: 20rem;
+        background-position: right bottom;
+        animation: rotate 1.5s linear infinite;
+      }
+
+      #background.--dropped::before {
+        width: 30rem;
+        height: 30rem;
+        animation: rotate 10s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate infinite;
+      }
+
+      #background.--changing-theme::before {
+        width: 60rem;
+        height: 60rem;
+        background-position: left top;
+      }
+
+      /* Inside the card */
+      main {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: fit-content;
+        height: 20rem;
+        background-color: var(--main-card-color);
+        backdrop-filter: blur(0.75rem);
+        padding: 4rem 4rem 4rem 6rem;
+        border-radius: 0.5rem;
+        cursor: grab;
+        transition: top 1s ease-out, left 1s ease-out, color 1s ease-out, opacity 1s ease-out, transform 0.5s ease-out, height 1s ease-out,
+          width 1s ease-out;
+      }
+
+      main::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2rem;
+        height: 100%;
+        background-color: var(--pr-accent-color);
+        border-radius: 0.5rem 0 0 0.5rem;
+        box-shadow: 0 0 2rem 1rem var(--transparent-accent-color);
+        transition: box-shadow 0.5s ease-out, width 1s ease-out;
+      }
+
+      .--dragging {
+        transition: none;
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      }
+
+      main.--dragging::after {
+        width: 3rem;
+        box-shadow: 0 0 2rem 1rem var(--pr-accent-color);
+        animation: color-shifter 5s infinite alternate;
+      }
+
+      main.--dragging > p > small:not(.--typing) {
+        animation: color-shifter 5s infinite alternate;
+      }
+
+      main.--dropping {
+        transform: translate(-50%, -50%) scale(0.85);
+        opacity: 0.35;
+      }
+
+      main.--dropped {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        transition: 2s opacity ease-out, 1s transform ease-out;
+      }
+
+      main:not(.--starting-idle) > #tip {
+        opacity: 0;
+        transition: opacity 0.35s ease-out;
+      }
+
+      main > #tip {
+        position: absolute;
+        top: -7rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: fit-content;
+        background-color: var(--card-color);
+        padding: 2rem;
+        border-radius: 0.5rem;
+        opacity: 0;
+        text-align: center;
+        transition: opacity 1s ease-out;
+        animation: bounce 6s infinite;
+        animation-delay: 7s;
+      }
+
+      #tip::after {
+        content: "";
+        position: absolute;
+        top: 90%;
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+        background-color: var(--card-color);
+        width: 2rem;
+        height: 2rem;
+      }
+
+      #tip > small {
+        color: var(--pr-accent-color);
+      }
+
+      main > p {
+        pointer-events: none;
+      }
+
+      main > p > small {
+        display: inherit;
+        width: fit-content;
+        padding-right: 0;
+        border-right: 0.25rem solid var(--text-color);
+        transition: border-rigth 0.5s, padding-right 0.5s;
+      }
+
+      .--idle {
+        padding-right: 0.25rem;
+        border-right: 0.25rem solid var(--pr-accent-color);
+        animation: blink 1.5s infinite alternate;
+      }
+
+      /* Outside the card */
+      main ~ span {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 42rem;
+        height: 20rem;
+        z-index: -1;
+      }
+
+      main ~ span::before {
+        content: "";
+        position: absolute;
+        bottom: -5rem;
+        right: -1rem;
+        width: 11rem;
+        height: 11rem;
+        background-color: var(--negative-action-color-1);
+        border-radius: 50%;
+        transition: bottom 1s, right 1s, opacity 0.5s;
+        animation: levitating 5s infinite alternate;
+        transition-delay: 0.15s;
+      }
+
+      main ~ span::after {
+        content: "";
+        position: absolute;
+        top: -2rem;
+        right: -4rem;
+        width: 9rem;
+        height: 9rem;
+        background-color: var(--scnd-accent-color);
+        border-radius: 50%;
+        transition: top 1s, right 1s, opacity 0.5s;
+        animation: levitating 3s infinite alternate;
+        transition-delay: 0.1s;
+      }
+
+      main.--dragging ~ span::before {
+        bottom: -12rem;
+        right: -5rem;
+        opacity: 0;
+      }
+
+      main.--dragging ~ span::after {
+        top: -5rem;
+        right: -10rem;
+        opacity: 0;
+      }
+
+      #not-found {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        text-align: center;
+        transition: opacity 1s ease-out, font-size 1s ease-out;
+      }
+
+      #not-found span {
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        color: var(--pr-accent-color);
+      }
+
+      /* Dropzones */
+      #dump,
+      #theme-switch {
+        position: fixed;
+        bottom: 10rem;
+        right: 50%;
+        transform: translateX(50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 8rem;
+        height: 8rem;
+        border-radius: 50%;
+        background-color: var(--card-color);
+        padding: 2rem;
+        font-size: 4rem;
+        font-weight: 700;
+        z-index: -1;
+        clip-path: circle(0% at 50% 100%);
+        transition: bottom 0.5s ease-in, clip-path 0.5s ease-in, opacity 1s, background-color 0.5s, transform 0.75s ease-in,
+          top 0.5s ease-in;
+      }
+
+      #theme-switch {
+        bottom: initial;
+        top: 10rem;
+        clip-path: circle(0% at 50% 0%);
+      }
+
+      main:not(.--dragging) ~ #dump,
+      main:not(.--dragging) ~ #theme-switch {
+        opacity: 0;
+      }
+
+      main.--dragging ~ #dump,
+      main.--dragging ~ #theme-switch {
+        opacity: 1;
+        clip-path: circle(120% at 50% 100%);
+      }
+
+      main.--dragging ~ #theme-switch {
+        clip-path: circle(120% at 50% 0%);
+      }
+
+      #dump.--active {
+        background-color: var(--negative-action-color-2);
+        transform: translateX(50%) scale(1.2);
+      }
+
+      #theme-switch.--active {
+        background-color: var(--pr-accent-color);
+        transform: translateX(50%) scale(1.2);
+      }
+
+      /* Dropzones coordinates */
+      .start {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+
+      .end {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+
+      /* Animations */
+      @keyframes rotate {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      @keyframes color-shifter {
+        25% {
+          filter: hue-rotate(90deg);
+        }
+        50% {
+          filter: hue-rotate(180deg);
+        }
+        75% {
+          filter: hue-rotate(270deg);
+        }
+        100% {
+          filter: hue-rotate(360deg);
+        }
+      }
+
+      @keyframes bounce {
+        35% {
+          top: -9rem;
+          transform: translateX(-50%) scaleX(0.8) scaleY(0.9);
+        }
+        50% {
+          top: -6.9rem;
+          transform: translateX(-50%) scale(1.05);
+        }
+        65% {
+          top: -9rem;
+          transform: translateX(-50%) scaleX(0.8) scaleY(0.9);
+        }
+        90% {
+          top: -7rem;
+          transform: translateX(-50%) scale(1);
+        }
+      }
+
+      @keyframes blink {
+        50% {
+          border-right-color: transparent;
+        }
+      }
+
+      @keyframes levitating {
+        from {
+          transform: translateY(0);
+        }
+
+        to {
+          transform: translateY(1rem);
+        }
+      }
+
+      /* Media Queries (Responsive design) */
+      @media (max-width: 1000px) {
+        html {
+          font-size: 70%;
+        }
+      }
+
+      @media (max-width: 700px) {
+        html {
+          font-size: 50%;
+        }
+      }
+
+      @media (max-width: 500px) {
+        html {
+          font-size: 30%;
+        }
+      }
+
+      @media (max-height: 700px) and (min-width: 500px) {
+        html {
+          font-size: 60%;
+        }
+      }
+
+      @media (max-height: 400px) {
+        html {
+          font-size: 30%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <span id="background"></span>
+
+    <main id="main-card" class="--starting-idle">
+      <span id="tip">
+        Prueba a arrastrar la tarjeta<br />
+        <small>¡Es divertido!</small>
+      </span>
+
+      <h1>Kevin Brian Flores Hernández</h1>
+      <p>
+        <small id="current-career"></small>
+      </p>
+    </main>
+    <span id="decorator"></span>
+
+    <h1 id="not-found">Parece que no hay <span>nada</span> aquí<br />¡recarga la página!</h1>
+
+    <!-- Dropzones -->
+    <div id="theme-switch">
+      ?
+      <span id="theme-start" class="start"></span>
+      <span id="theme-end" class="end"></span>
+    </div>
+
+    <div id="dump">
+      ×
+      <span id="dump-start" class="start"></span>
+      <span id="dump-end" class="end"></span>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      // SET THEME
+      const preferedColorScheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      const setTheme = theme => {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("theme", theme);
+      };
+
+      setTheme(localStorage.getItem("theme") || preferedColorScheme || "dark");
+
+      // ONLOAD
+      window.addEventListener("load", () => {
+        // CURRENT CAREER TYPING EFFECT
+        const currentCareerElement = document.getElementById("current-career");
+        const currentCareer = "Ingeniería en Sistemas";
+        let carrerLetters = currentCareer.split("");
+
+        for (let i = 0; i < carrerLetters.length; i++) {
+          const letter = carrerLetters[i];
+          setTimeout(() => {
+            if (i === 0) {
+              currentCareerElement.classList.add("--typing");
+            } else if (i === carrerLetters.length - 1) {
+              currentCareerElement.classList.add("--idle");
+              currentCareerElement.classList.remove("--typing");
+            }
+
+            currentCareerElement.innerHTML += `${letter}`;
+          }, i * 100);
+        }
+
+        // DRAGGRABLE CARD
+        const backgroundBlob = document.getElementById("background");
+        const mainCard = document.getElementById("main-card");
+        const dump = document.getElementById("dump");
+        const themeSwitch = document.getElementById("theme-switch");
+        // Elements that will be used to check if the dropzones are in range
+        let dumpStart = document.getElementById("dump-start").getBoundingClientRect();
+        let dumpEnd = document.getElementById("dump-end").getBoundingClientRect();
+        let themeStart = document.getElementById("theme-start").getBoundingClientRect();
+        let themeEnd = document.getElementById("theme-end").getBoundingClientRect();
+
+        let initialX = 0,
+          initialY = 0;
+        let offsetLeft = 0,
+          offsetTop = 0;
+        let isDragging = false;
+
+        // Show a tip if the card is idle from the beginning
+        setTimeout(() => {
+          if (mainCard.classList.contains("--starting-idle")) {
+            const tip = document.getElementById("tip");
+            tip.style.opacity = 1;
+          }
+        }, 5000);
+        dump.style.bottom = "-10rem";
+        themeSwitch.style.top = "-10rem";
+
+        // Event listeners
+        mainCard.addEventListener("mousedown", e => {
+          initialX = e.clientX - mainCard.offsetLeft;
+          initialY = e.clientY - mainCard.offsetTop;
+          isDragging = true;
+
+          mainCard.classList.add("--dragging");
+          mainCard.classList.remove("--starting-idle");
+          backgroundBlob.classList.add("--dragging");
+          tip.style.opacity = 0;
+          dump.style.bottom = "10rem";
+          themeSwitch.style.top = "10rem";
+
+          mainCard.addEventListener("mousemove", onMouseMove);
+          mainCard.addEventListener("mouseup", onMouseUp);
+        });
+
+        const onMouseMove = e => {
+          if (!isDragging) return;
+
+          // Update the position of the card
+          offsetLeft = e.clientX - initialX;
+          offsetTop = e.clientY - initialY;
+          mainCard.style.left = `${offsetLeft}px`;
+          mainCard.style.top = `${offsetTop}px`;
+
+          console.log(dumpStart.left, dumpStart.top, dumpEnd.left, dumpEnd.top, offsetLeft, offsetTop);
+
+          // Check if the dropzones are in range
+          if (e.clientX >= dumpStart.left && e.clientY >= dumpStart.top && e.clientX <= dumpEnd.left && e.clientY <= dumpEnd.top) {
+            dump.classList.add("--active");
+            mainCard.classList.add("--dropping");
+            backgroundBlob.classList.add("--dropping");
+            document.body.classList.add("--dropping");
+
+            console.warn("Are you sure you want to do that?");
+          } else if (e.clientX >= themeStart.left && e.clientY >= themeStart.top && e.clientX <= themeEnd.left && e.clientY <= themeEnd.top
+          ) {
+            themeSwitch.classList.add("--active");
+            mainCard.classList.add("--dropping");
+            backgroundBlob.classList.add("--changing-theme");
+            document.body.classList.add("--changing-theme");
+
+            console.info("Drop to change theme");
+          } else {
+            mainCard.classList.remove("--dropping");
+            dump.classList.remove("--active");
+            themeSwitch.classList.remove("--active");
+
+            backgroundBlob.classList.remove("--dropping");
+            backgroundBlob.classList.remove("--changing-theme");
+            document.body.classList.remove("--dropping");
+            document.body.classList.remove("--changing-theme");
+
+            dumpStart = document.getElementById("dump-start").getBoundingClientRect();
+            dumpEnd = document.getElementById("dump-end").getBoundingClientRect();
+            themeStart = document.getElementById("theme-start").getBoundingClientRect();
+            themeEnd = document.getElementById("theme-end").getBoundingClientRect();
+          }
+        };
+
+        const onMouseUp = e => {
+          isDragging = false;
+          backgroundBlob.classList.remove("--dragging");
+          mainCard.removeEventListener("mousemove", onMouseMove);
+          mainCard.removeEventListener("mouseup", onMouseUp);
+
+          // Drop and destroy the card
+          if (e.clientX >= dumpStart.left && e.clientY >= dumpStart.top && e.clientX <= dumpEnd.left && e.clientY <= dumpEnd.top) {
+            destroyCard();
+            return;
+          }
+
+          if (e.clientX >= themeStart.left && e.clientY >= themeStart.top && e.clientX <= themeEnd.left && e.clientY <= themeEnd.top) {
+            localStorage.getItem("theme") === "light" ? setTheme("dark") : setTheme("light");
+            mainCard.classList.remove("--dropping");
+            document.body.classList.remove("--changing-theme");
+            document.body.classList.add("--changed-theme");
+            setTimeout(() => {
+              document.body.classList.remove("--changed-theme");
+              backgroundBlob.classList.remove("--changing-theme");
+            }, 600);
+          }
+          // Else reset the position of the card
+          mainCard.classList.remove("--dragging");
+          dump.style.bottom = "-10rem";
+          themeSwitch.style.top = "-10rem";
+          mainCard.style.left = "50%";
+          mainCard.style.top = "50%";
+        };
+
+        const destroyCard = () => {
+          mainCard.classList.add("--dropped");
+          document.body.classList.remove("--dropping");
+          document.body.classList.add("--dropped");
+          setTimeout(() => {
+            mainCard.outerHTML = "";
+            dump.classList.remove("--active");
+            document.body.classList.remove("--dropped");
+
+            setTimeout(() => {
+              const notFound = document.getElementById("not-found");
+              notFound.style.opacity = 1;
+              backgroundBlob.classList.remove("--dropping");
+              backgroundBlob.classList.add("--dropped");
+            }, 1000);
+          }, 1200);
+
+          console.info("Main card eliminated");
+          console.info("It appears it's nothing to see here, reload the page again!");
+        };
+      });
+    </script>
+  </body>
+</html>
